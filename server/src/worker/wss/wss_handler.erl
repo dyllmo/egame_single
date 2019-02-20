@@ -29,6 +29,8 @@
 %% @end
 %%--------------------------------------------------------------------------------------------------------------
 init(Req, Opts) ->
+	io:format("go wss init~n"),
+	io:format("Req:~p~n Opts:~p~n", [Req, Opts]),
 	Peer = cowboy_req:peer(Req),
 	Ip = lib_misc:peer_to_ip(Peer),
 	{cowboy_websocket,Req,#client_state{ip = Ip},Opts}.
@@ -39,6 +41,8 @@ init(Req, Opts) ->
 %% @end
 %%--------------------------------------------------------------------------------------------------------------
 websocket_init(State) ->
+	io:format("go wss websocket_init~n"),
+	io:format("State:~p~n ", [State]),
 	{ok,State}.
 
 %%--------------------------------------------------------------------------------------------------------------
@@ -47,7 +51,8 @@ websocket_init(State) ->
 %% @end
 %%--------------------------------------------------------------------------------------------------------------
 websocket_handle({binary,Request},State) ->
-	io:format("Request:~p~n", [Request]),
+	io:format("go wss websocket_handle~n"),
+	io:format("Request:~p~n State:~p~n", [Request, State]),
 	try router:request(Request,State) of
 		{ok,OutBin,NewState} ->
 			{reply,{binary,OutBin},NewState}
@@ -57,6 +62,7 @@ websocket_handle({binary,Request},State) ->
 	end;
 	
 websocket_handle(_Request, State) ->
+	io:format("go wss websocket_handle~n"),
 	{ok,State}.
 
 %%--------------------------------------------------------------------------------------------------------------
@@ -65,6 +71,8 @@ websocket_handle(_Request, State) ->
 %% @end
 %%--------------------------------------------------------------------------------------------------------------
 websocket_info (Msg, State) ->
+	io:format("go wss websocket_info~n"),
+	io:format("Msg:~p~n State:~p~n", [Msg, State]),
 	case Msg of
         {send,Data} ->
             {reply,{binary,Data},State};
@@ -89,9 +97,13 @@ websocket_info (Msg, State) ->
 %% @end
 %%--------------------------------------------------------------------------------------------------------------
 kill (PidList) when is_list(PidList) ->
+	io:format("go wss kill~n"),
+	io:format("PidList:~p~n", [PidList]),
 	lists:foreach(fun(Pid) -> kill(Pid) end,PidList);
 	
 kill (Pid) when is_pid(Pid) ->
+	io:format("go wss kill~n"),
+	io:format("Pid:~p~n", [Pid]),
 	Pid ! {kill,self()},
 	receive
 		ok -> true
@@ -105,9 +117,13 @@ kill (Pid) when is_pid(Pid) ->
 %% @end
 %%--------------------------------------------------------------------------------------------------------------
 send (PidList, OutBin) when is_list(PidList) ->
+	io:format("go wss send~n"),
+	io:format("PidList:~p~n OutBin:~p~n", [PidList, OutBin]),
 	lists:foreach(fun(Pid) -> send(Pid,OutBin) end,PidList);
 	
 send (Pid, OutBin) when is_pid(Pid) ->
+	io:format("go wss send~n"),
+	io:format("Pid:~p~n OutBin:~p~n", [Pid, OutBin]),
 	Pid ! {send,OutBin}.
 	
 %%--------------------------------------------------------------------------------------------------------------
@@ -116,9 +132,12 @@ send (Pid, OutBin) when is_pid(Pid) ->
 %% @end
 %%--------------------------------------------------------------------------------------------------------------
 apply (PidList, M, F, A) when is_list(PidList) ->
+	io:format("go wss apply~n"),
+	io:format("PidList:~p~n", [PidList]),
 	lists:foreach(fun(Pid) -> apply(Pid,M,F,A) end,PidList);
 	
 apply (Pid, M, F, A) when is_pid(Pid) ->
+	io:format("go wss apply~n"),
 	case erlang:is_process_alive(Pid) of
 		true ->
 			case self() of
@@ -146,9 +165,11 @@ apply (Pid, M, F, A) when is_pid(Pid) ->
 %% @end
 %%--------------------------------------------------------------------------------------------------------------
 async_apply (PidList, M, F, A) when is_pid(PidList) -> 
+	io:format("go wss async_apply~n"),
 	lists:foreach(fun(Pid) -> async_apply(Pid,M,F,A) end,PidList);
 	
 async_apply (Pid, M, F, A) when is_pid(Pid) -> 
+	io:format("go wss async_apply~n"),
 	case erlang:is_process_alive(Pid) of
 		true ->
 			Pid ! {async_apply,M,F,A};
@@ -162,6 +183,7 @@ async_apply (Pid, M, F, A) when is_pid(Pid) ->
 %% @end
 %%--------------------------------------------------------------------------------------------------------------
 apply_after (Time, {M, F, A}) ->
+	io:format("go wss apply_after~n"),
     TimerRef = erlang:send_after(Time,self(),{async_apply,M,F,A}),
     {apply_after_ref,TimerRef}.
     
@@ -171,6 +193,7 @@ apply_after (Time, {M, F, A}) ->
 %% @end
 %%--------------------------------------------------------------------------------------------------------------
 apply_after_cancel ({apply_after_ref, TimerRef}) ->
+	io:format("go wss apply_after_cancel~n"),
     erlang:cancel_timer(TimerRef).
 	
 %%--------------------------------------------------------------------------------------------------------------
@@ -179,6 +202,7 @@ apply_after_cancel ({apply_after_ref, TimerRef}) ->
 %% @end
 %%--------------------------------------------------------------------------------------------------------------
 try_apply (M, F, A, State) ->
+	io:format("go wss try_apply~n"),
     case catch apply(M, F, A) of
         {'EXIT',Reason} ->
 			PlayerId = State #client_state.player_id,
@@ -201,6 +225,7 @@ try_apply (M, F, A, State) ->
 %% @end
 %%--------------------------------------------------------------------------------------------------------------
 check_request_error (Request, Reason, Stack, State) ->
+	io:format("go wss check_request_error~n"),
 	case catch handle_request_error(Request,Reason,Stack,State) of
 		{'EXIT',Reason} ->
 			{ok,State};
@@ -220,6 +245,7 @@ check_request_error (Request, Reason, Stack, State) ->
 %% @end
 %%--------------------------------------------------------------------------------------------------------------
 handle_request_error (Request, Reason, Stack, State) ->
+	io:format("go wss handle_request_error~n"),
 	PlayerId = State #client_state.player_id,
 	Ip		 = State #client_state.ip,
 	LastTime = State #client_state.last_error_time,
@@ -239,6 +265,7 @@ handle_request_error (Request, Reason, Stack, State) ->
 %% @end
 %%--------------------------------------------------------------------------------------------------------------
 error_log (PlayerId, Ip, Request, Reason, Stack) ->
+	io:format("go wss error_log~n"),
 	case catch router:mfargs(Request) of
 		{M,F,Args} ->
 			?ERROR(

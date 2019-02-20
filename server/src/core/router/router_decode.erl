@@ -49,7 +49,7 @@ class (_, _, _, _, _) ->
 %% @end
 %%--------------------------------------------------------------------------------------------------------------
 value (enum,Bin0) ->
-	value(byte,Bin0);
+	value(ushort,Bin0);
 
 value (bool, Bin0) ->
 	<<Arg:8/unsigned,Bin1/binary>> = Bin0,

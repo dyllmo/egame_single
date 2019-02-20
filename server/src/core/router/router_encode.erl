@@ -22,7 +22,7 @@ api (player, check_token, Arg) ->
 	{Enum_result} = Arg,
 	<<
 		0:16/unsigned,
-		Enum_result:8/unsigned
+		Enum_result:16/unsigned
 	>>;
 
 api (player, login, Arg) ->
@@ -30,7 +30,7 @@ api (player, login, Arg) ->
 	{StringBin_nickname,StringLen_nickname} = value(string,String_nickname),
 	<<
 		1:16/unsigned,
-		Enum_result:8/unsigned,
+		Enum_result:16/unsigned,
 		Long_player_id:64/signed,
 		StringLen_nickname:16/unsigned,
 		StringBin_nickname/binary

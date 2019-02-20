@@ -83,7 +83,7 @@ do_post_hander(Path, Req) ->
 %% api 检验http请求的参数
 %% @end
 %%-------------------------------------------------------------------------------------------------------------
-do_api (<<"/login">>, _DataList) ->
+do_api (<<"/login">>, DataList) ->
 	% UidBin	 = lib_misc:get_list_value(<<"uid">>,DataList),
 	% SignBin	 = lib_misc:get_list_value(<<"sign">>,DataList),
 	% Uid		 = binary_to_list(UidBin),
@@ -96,6 +96,7 @@ do_api (<<"/login">>, _DataList) ->
 	% 		throw(sign_error)
 	% end,
 	% Token = token:gen(Uid),
+	io:format("go do_api~n DataList:~p~n", [DataList]),
 	iolist_to_binary(jsx:encode([{code,0}]));
 
 do_api (_, _) ->
